@@ -16,7 +16,7 @@ class FilesViewModel(private val repository: FilesRepository) : ViewModel() {
         viewModelScope.launch {
             try {
                 val filesInfo = repository.loadFilesInfo()
-                _filesState.value = FilesState.Contacts(filesInfo)
+                _filesState.value = FilesState.Content(filesInfo)
             } catch (e: Exception) {
                 _filesState.value = FilesState.Error(e.message.orEmpty())
             }
