@@ -65,7 +65,7 @@ class FileInfoViewHolder(view: View) : ViewHolder(view) {
         when (extension) {
             PNG -> R.drawable.png_icon
             JPEG, JPG -> R.drawable.jpg_icon
-            TXT -> R.drawable.txt
+            TXT -> R.drawable.txt_icon
             GIF -> R.drawable.gif_icon
             DIRECTORY -> R.drawable.directory_icon
             else -> R.drawable.file_icon

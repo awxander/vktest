@@ -1,15 +1,18 @@
 package com.example.vktest
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.webkit.MimeTypeMap
+import android.widget.RadioButton
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import com.example.vktest.data.repository.LocalDataSource
 import com.example.vktest.databinding.ActivityMainBinding
@@ -53,6 +56,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    enum class SortType{
+        BY_NAME,
+        BY_SIZE,
+        BY_TYPE,
+        BY_DATE
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
@@ -70,33 +80,46 @@ class MainActivity : AppCompatActivity() {
                 checkPermission()
                 viewModel.loadFilesInfo()
             }
-            sortBySizeBtn.setOnClickListener {
-                if (filesInfo.size > 0) {
-                    filesInfo.sortBy {
-                        it.sizeInBytes
+            setSortRadioButton(sortByNameBtn, SortType.BY_NAME)
+            setSortRadioButton(sortBySizeBtn, SortType.BY_SIZE)
+            setSortRadioButton(sortByExtensionBtn, SortType.BY_TYPE)
+            setSortRadioButton(sortByDateBtn, SortType.BY_DATE)
+
+            sortBtnRadioGroup.setOnCheckedChangeListener{  _, checkedId ->
+                for (i in 0 until sortBtnRadioGroup.childCount) {
+                    val radioButton = sortBtnRadioGroup.getChildAt(i) as RadioButton
+                    if (radioButton.id != checkedId) {
+                        radioButton.setRightDrawable(null)//убираем иконку при нажатии на другую кнопку
                     }
-                    updateAdapterList(filesInfo)
-                }
-            }
-            sortByNameBtn.setOnClickListener {
-                if (filesInfo.size > 0) {
-                    filesInfo.sortBy {
-                        it.name
-                    }
-                    updateAdapterList(filesInfo)
-                }
-            }
-            sortByExtensionBtn.setOnClickListener {
-                if (filesInfo.size > 0) {
-                    filesInfo.sortBy {
-                        it.extension
-                    }
-                    updateAdapterList(filesInfo)
                 }
             }
         }
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private fun setSortRadioButton(button : RadioButton, sortType: SortType){
+        var byAsc = true//по умолчанию сортировка по возрастанию
+        button.setOnClickListener {
+            if (filesInfo.size > 0) {
+                when(sortType){
+                    SortType.BY_NAME -> filesInfo.sortBy { it.name }
+                    SortType.BY_SIZE -> filesInfo.sortBy { it.sizeInBytes }
+                    SortType.BY_TYPE -> filesInfo.sortBy { it.extension }
+                    SortType.BY_DATE -> filesInfo.sortBy { it.modifiedDateInSeconds }
+                }
+                byAsc = if (byAsc) {//при нажатии на кнопку меняем порядок сортировки на противоположный
+                    // и также меняем стрелку, которая этот порядок отображает
+                    updateAdapterList(filesInfo)
+                    button.setRightDrawable(getDrawable(R.drawable.baseline_keyboard_arrow_down_24))
+                    false
+                } else {
+                    updateAdapterList(filesInfo.reversed())
+                    button.setRightDrawable(getDrawable(R.drawable.baseline_keyboard_arrow_up_24))
+                    true
+                }
+            }
+        }
+    }
 
     private fun updateAdapterList(filesList: List<FileInfo>) {
         adapter.deleteAll()

@@ -7,7 +7,7 @@
     tools:context=".MainActivity">
 
     <RadioGroup
-        android:id="@+id/my_radio_group"
+        android:id="@+id/sortBtnRadioGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
@@ -42,6 +42,15 @@
             android:button="@null"
             android:gravity="center"
             android:text="@string/extension" />
+
+        <RadioButton
+            android:id="@+id/sortByDateBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:button="@null"
+            android:gravity="center"
+            android:text="@string/modified_date" />
     </RadioGroup>
 
     <Button
@@ -77,7 +86,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/my_radio_group"
+        app:layout_constraintTop_toBottomOf="@+id/sortBtnRadioGroup"
         tools:listitem="@layout/file_info_item" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
