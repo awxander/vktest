@@ -7,4 +7,7 @@
     <string name="permission_denied">в разрешении отказано</string>
     <string name="watch_changed_files">посмотреть \n измененные</string>
     <string name="load_files">загрузить \n файлы</string>
+    <string name="name">название</string>
+    <string name="size">размер</string>
+    <string name="extension">тип</string>
 </resources>

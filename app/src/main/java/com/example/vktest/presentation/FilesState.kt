@@ -8,7 +8,7 @@ sealed interface FilesState{
 
     object Loading : FilesState
 
-    class Content(val contactsList : List<FileInfo>?) : FilesState
+    class Content(val filesInfoList : List<FileInfo>) : FilesState
 
     class Error(val text: String) : FilesState
 }

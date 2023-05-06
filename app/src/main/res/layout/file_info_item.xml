@@ -34,11 +34,20 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
+                android:id="@+id/textViewCreateDate"
+                style="@style/RowText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/_11_04_2023_18_30"
+                android:textSize="20sp"
+                android:textStyle="normal" />
+
+            <TextView
                 android:id="@+id/textViewName"
                 style="@style/RowText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/my_photo" />
+                android:text="ффффффффффффффффффффффффффффффффффффффффффффффффффффффффффффффффффф" />
 
             <TextView
                 android:id="@+id/textViewSize"
@@ -46,13 +55,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/_30_kb" />
-
-            <TextView
-                android:id="@+id/textViewCreateDate"
-                style="@style/RowText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/_11_04_2023_18_30" />
 
         </LinearLayout>
 

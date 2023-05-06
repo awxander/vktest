@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import com.example.vktest.data.repository.LocalDataSource
 import com.example.vktest.databinding.ActivityMainBinding
 import com.example.vktest.domain.entites.FileInfo
+import com.example.vktest.presentation.FilesAdapter
 import com.example.vktest.presentation.FilesState
 import com.example.vktest.presentation.FilesViewModel
 import java.io.File
@@ -23,13 +24,15 @@ class MainActivity : AppCompatActivity() {
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel by lazy{//TODO сделать через di
+    private val viewModel by lazy {//TODO сделать через di
         FilesViewModel(
             repository = LocalDataSource(
                 contentResolver = applicationContext.contentResolver
             )
         )
     }
+
+    private val adapter = FilesAdapter()
 
     private val filesInfo = mutableListOf<FileInfo>()
 
@@ -66,17 +69,50 @@ class MainActivity : AppCompatActivity() {
             loadFilesButton.setOnClickListener {
                 checkPermission()
                 viewModel.loadFilesInfo()
-                //TODO вызов ViewModel с loadFiles
+            }
+            sortBySizeBtn.setOnClickListener {
+                if (filesInfo.size > 0) {
+                    filesInfo.sortBy {
+                        it.sizeInBytes
+                    }
+                    updateAdapterList(filesInfo)
+                }
+            }
+            sortByNameBtn.setOnClickListener {
+                if (filesInfo.size > 0) {
+                    filesInfo.sortBy {
+                        it.name
+                    }
+                    updateAdapterList(filesInfo)
+                }
+            }
+            sortByExtensionBtn.setOnClickListener {
+                if (filesInfo.size > 0) {
+                    filesInfo.sortBy {
+                        it.extension
+                    }
+                    updateAdapterList(filesInfo)
+                }
             }
         }
     }
 
-    private fun handleFilesState(filesState: FilesState){
-        when(filesState){
+
+    private fun updateAdapterList(filesList: List<FileInfo>) {
+        adapter.deleteAll()
+        adapter.insertFiles(filesList)
+    }
+
+    private fun handleFilesState(filesState: FilesState) {
+        when (filesState) {
             is FilesState.Initial -> Unit
             is FilesState.Loading -> Unit//TODO добавить progressbar
             is FilesState.Error -> showErrorMsg(filesState.text)
-            is FilesState.Content ->
+            is FilesState.Content -> {
+                filesInfo.clear()
+                filesInfo.addAll(filesState.filesInfoList)
+                adapter.insertFiles(filesState.filesInfoList)
+            }
         }
     }
 
@@ -89,7 +125,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView() {
-
+        binding.fileInfoRecyclerView.adapter = adapter
     }
 
 
@@ -102,7 +138,7 @@ class MainActivity : AppCompatActivity() {
     private fun isPermissionGranted(): Boolean =
         PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(
             this,
-            Manifest.permission.READ_CONTACTS
+            Manifest.permission.READ_EXTERNAL_STORAGE
         )
 
 

@@ -3,5 +3,13 @@
     <style name="RowText" parent="Widget.AppCompat.TextView">
         <item name="android:textSize">24sp</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="SortButton" parent="TextAppearance.AppCompat.Button">
+        <item name="backgroundTint">@color/white</item>
+        <item name="android:textColor">@color/bright_purple</item>
+        <item name="android:textStyle">bold</item>
     </style>
 </resources>
