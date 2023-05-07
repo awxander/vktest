@@ -56,12 +56,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    enum class SortType{
-        BY_NAME,
-        BY_SIZE,
-        BY_TYPE,
-        BY_DATE
-    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -165,4 +160,11 @@ class MainActivity : AppCompatActivity() {
         )
 
 
+}
+
+enum class SortType{
+    BY_NAME,
+    BY_SIZE,
+    BY_TYPE,
+    BY_DATE
 }
