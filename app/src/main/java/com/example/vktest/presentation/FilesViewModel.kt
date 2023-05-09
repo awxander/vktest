@@ -20,7 +20,19 @@ class FilesViewModel(private val repository: FilesRepository) : ViewModel() {
                 val filesInfo = repository.loadFilesInfo()
                 _filesState.value = FilesState.Content(filesInfo)
             } catch (e: Exception) {
-                Log.e(TAG, e.stackTrace.contentToString())
+                Log.e(TAG, e.stackTrace.contentToString() + e.message.orEmpty())
+                _filesState.value = FilesState.Error(e.message.orEmpty())
+            }
+        }
+    }
+
+    fun loadModifiedFiles(){
+        viewModelScope.launch {
+            try {
+                val filesInfo = repository.loadChangedFiles()
+                _filesState.value = FilesState.Content(filesInfo)
+            } catch (e: Exception) {
+                Log.e(TAG, e.stackTrace.contentToString() + e.message.orEmpty())
                 _filesState.value = FilesState.Error(e.message.orEmpty())
             }
         }

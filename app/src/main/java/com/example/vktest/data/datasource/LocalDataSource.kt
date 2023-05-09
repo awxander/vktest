@@ -1,4 +1,4 @@
-package com.example.vktest.data.repository
+package com.example.vktest.data.datasource
 
 import android.content.ContentResolver
 import android.content.ContentUris
@@ -7,10 +7,9 @@ import android.provider.MediaStore
 import com.example.vktest.domain.entites.FileInfo
 import com.example.vktest.domain.repository.FilesRepository
 
-class LocalDataSource(private val contentResolver: ContentResolver) : FilesRepository {
+class LocalDataSource(private val contentResolver: ContentResolver) {
 
-
-    override suspend fun loadFilesInfo(): List<FileInfo> {
+    suspend fun loadFilesInfo(): List<FileInfo> {
         //TODO разбить на несколько функций, нечитаемое говно
 
         val result = mutableListOf<FileInfo>()
@@ -36,7 +35,7 @@ class LocalDataSource(private val contentResolver: ContentResolver) : FilesRepos
             do {
                 val id = cursor.getLong(idIndex)
                 val name = cursor.getString(nameIndex) ?: continue
-                val extension = name.split(".").let {
+                val extension = name.split(".").let {//TODO +- хрень, поменять
                     if (it.size < 2) {//если у нас при разбиении названия лишь
                         // 1 строка -> нет расширения -> это директория
                         "dir"

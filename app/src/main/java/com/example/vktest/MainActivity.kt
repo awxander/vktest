@@ -3,24 +3,20 @@ package com.example.vktest
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
-import android.util.Log
-import android.webkit.MimeTypeMap
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
-import com.example.vktest.data.repository.LocalDataSource
+import com.example.vktest.data.datasource.LocalDataSource
+import com.example.vktest.data.db.FileHashDatabase
+import com.example.vktest.data.repository.FilesRepositoryImpl
 import com.example.vktest.databinding.ActivityMainBinding
 import com.example.vktest.domain.entites.FileInfo
 import com.example.vktest.presentation.FilesAdapter
 import com.example.vktest.presentation.FilesState
 import com.example.vktest.presentation.FilesViewModel
-import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,8 +25,9 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel by lazy {//TODO сделать через di
         FilesViewModel(
-            repository = LocalDataSource(
-                contentResolver = applicationContext.contentResolver
+            FilesRepositoryImpl(
+                database = FileHashDatabase.getInstance(this),
+                dataSource = LocalDataSource(applicationContext.contentResolver)
             )
         )
     }
@@ -79,6 +76,10 @@ class MainActivity : AppCompatActivity() {
             setSortRadioButton(sortBySizeBtn, SortType.BY_SIZE)
             setSortRadioButton(sortByExtensionBtn, SortType.BY_TYPE)
             setSortRadioButton(sortByDateBtn, SortType.BY_DATE)
+
+            loadModifiedFilesButton.setOnClickListener {
+                viewModel.loadModifiedFiles()
+            }
 
             sortBtnRadioGroup.setOnCheckedChangeListener{  _, checkedId ->
                 for (i in 0 until sortBtnRadioGroup.childCount) {
