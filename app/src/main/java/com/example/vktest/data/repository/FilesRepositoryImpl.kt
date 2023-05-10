@@ -38,6 +38,7 @@ class FilesRepositoryImpl(
         for(fileInfo in filesInfo){
             if(!lastSavedFileHashesInMap!!.containsKey(fileInfo.hashCode())){
                 database.fileHashDao().insert(FileInfoConverter.toFileHashEntity(fileInfo))
+                fileInfo.modified = true
                 changedFilesInfo.add(fileInfo)
             }
         }
