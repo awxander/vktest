@@ -12,4 +12,12 @@
         <item name="android:textColor">@color/bright_purple</item>
         <item name="android:textStyle">bold</item>
     </style>
+
+
+    <style name="InfoText" parent="Widget.AppCompat.TextView">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_margin">20dp</item>
+    </style>
 </resources>
