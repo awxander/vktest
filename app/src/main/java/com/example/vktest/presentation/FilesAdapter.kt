@@ -4,14 +4,16 @@ import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.example.vktest.Extensions
 import com.example.vktest.R
 import com.example.vktest.data.DateFormatter
 import com.example.vktest.databinding.FileInfoItemBinding
 import com.example.vktest.domain.entites.FileInfo
 
-class FilesAdapter : RecyclerView.Adapter<FileInfoViewHolder>() {
+class FilesAdapter(private val onClick : (FileInfo) -> Unit) : RecyclerView.Adapter<FileInfoViewHolder>() {
 
     private val filesList = mutableListOf<FileInfo>()
 
@@ -24,7 +26,7 @@ class FilesAdapter : RecyclerView.Adapter<FileInfoViewHolder>() {
     override fun getItemCount(): Int = filesList.size
 
     override fun onBindViewHolder(holder: FileInfoViewHolder, position: Int) {
-        holder.bind(filesList[position])
+        holder.bind(filesList[position], onClick)
     }
 
     fun insertFiles(files: List<FileInfo>) {
@@ -37,37 +39,50 @@ class FilesAdapter : RecyclerView.Adapter<FileInfoViewHolder>() {
         filesList.clear()
         notifyItemRangeRemoved(0, size)
     }
+
+    fun updateFilesList(files: List<FileInfo>) {
+        deleteAll()
+        insertFiles(files)
+    }
 }
 
 class FileInfoViewHolder(view: View) : ViewHolder(view) {
 
     private val binding = FileInfoItemBinding.bind(view)
 
-    companion object {
-        const val PNG = "png"
-        const val JPG = "jpg"
-        const val JPEG = "jpeg"
-        const val TXT = "txt"
-        const val GIF = "gif"
-        const val DIRECTORY = "dir"
-    }
 
-    fun bind(fileInfo: FileInfo) {
+    fun bind(fileInfo: FileInfo, onClick : (FileInfo) -> Unit) {
         binding.apply {
             textViewName.text = fileInfo.name
             textViewSize.text = Formatter.formatFileSize(itemView.context, fileInfo.sizeInBytes)
             textViewCreateDate.text = DateFormatter.getDate(fileInfo.modifiedDateInSeconds)
             imageView.setImageResource(getDrawableForExtension(fileInfo.extension))
+            if (fileInfo.modified)
+                textViewName.setTextColor(
+                    ContextCompat.getColor(
+                        itemView.context,
+                        R.color.modified_color
+                    )
+                )
+            else
+                textViewName.setTextColor(
+                    ContextCompat.getColor(
+                        itemView.context,
+                        androidx.appcompat.R.color.abc_tint_default
+                    )
+                )
+
+            textViewName.setOnClickListener { onClick(fileInfo) }
         }
     }
 
     private fun getDrawableForExtension(extension: String) =
         when (extension) {
-            PNG -> R.drawable.png_icon
-            JPEG, JPG -> R.drawable.jpg_icon
-            TXT -> R.drawable.txt_icon
-            GIF -> R.drawable.gif_icon
-            DIRECTORY -> R.drawable.directory_icon
+            Extensions.PNG -> R.drawable.png_icon
+            Extensions.JPEG, Extensions.JPG -> R.drawable.jpg_icon
+            Extensions.TXT -> R.drawable.txt_icon
+            Extensions.GIF -> R.drawable.gif_icon
+            Extensions.DIRECTORY -> R.drawable.directory_icon
             else -> R.drawable.file_icon
         }
 

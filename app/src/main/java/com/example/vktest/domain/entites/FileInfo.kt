@@ -8,7 +8,8 @@ data class FileInfo(
     val name: String,
     val sizeInBytes: Long,
     val modifiedDateInSeconds: Long,
-    val extension : String
+    val extension : String,
+    var modified: Boolean = false
 ){
     override fun hashCode(): Int {
         return Objects.hash(name, sizeInBytes, modifiedDateInSeconds)

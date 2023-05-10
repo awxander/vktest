@@ -2,13 +2,16 @@ package com.example.vktest
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.example.vktest.data.datasource.LocalDataSource
 import com.example.vktest.data.db.FileHashDatabase
 import com.example.vktest.data.repository.FilesRepositoryImpl
@@ -32,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private val adapter = FilesAdapter()
+    private val adapter = FilesAdapter(::onClick)
 
     private val filesInfo = mutableListOf<FileInfo>()
 
@@ -40,19 +43,14 @@ class MainActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) {
                 Toast.makeText(
-                    this@MainActivity,
-                    getString(R.string.permission_received),
-                    Toast.LENGTH_LONG
+                    this@MainActivity, getString(R.string.permission_received), Toast.LENGTH_LONG
                 ).show()
             } else {
                 Toast.makeText(
-                    this@MainActivity,
-                    getString(R.string.permission_denied),
-                    Toast.LENGTH_LONG
+                    this@MainActivity, getString(R.string.permission_denied), Toast.LENGTH_LONG
                 ).show()
             }
         }
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,6 +62,19 @@ class MainActivity : AppCompatActivity() {
         initListeners()
 
         viewModel.filesState.observe(this, ::handleFilesState)
+        checkPermission()
+        viewModel.loadFilesInfo()
+    }
+
+    private fun onClick(fileInfo: FileInfo){
+        if(fileInfo.extension == Extensions.DIRECTORY){
+            viewModel.loadFilesInfo(fileInfo.uri)
+        }else{
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = fileInfo.uri
+            intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            startActivity(intent)
+        }
     }
 
     private fun initListeners() {
@@ -81,7 +92,7 @@ class MainActivity : AppCompatActivity() {
                 viewModel.loadModifiedFiles()
             }
 
-            sortBtnRadioGroup.setOnCheckedChangeListener{  _, checkedId ->
+            sortBtnRadioGroup.setOnCheckedChangeListener { _, checkedId ->
                 for (i in 0 until sortBtnRadioGroup.childCount) {
                     val radioButton = sortBtnRadioGroup.getChildAt(i) as RadioButton
                     if (radioButton.id != checkedId) {
@@ -93,33 +104,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    private fun setSortRadioButton(button : RadioButton, sortType: SortType){
+    private fun setSortRadioButton(button: RadioButton, sortType: SortType) {
         var byAsc = true//по умолчанию сортировка по возрастанию
         button.setOnClickListener {
             if (filesInfo.size > 0) {
-                when(sortType){
+                when (sortType) {
                     SortType.BY_NAME -> filesInfo.sortBy { it.name }
                     SortType.BY_SIZE -> filesInfo.sortBy { it.sizeInBytes }
                     SortType.BY_TYPE -> filesInfo.sortBy { it.extension }
                     SortType.BY_DATE -> filesInfo.sortBy { it.modifiedDateInSeconds }
                 }
-                byAsc = if (byAsc) {//при нажатии на кнопку меняем порядок сортировки на противоположный
-                    // и также меняем стрелку, которая этот порядок отображает
-                    updateAdapterList(filesInfo)
-                    button.setRightDrawable(getDrawable(R.drawable.baseline_keyboard_arrow_down_24))
-                    false
-                } else {
-                    updateAdapterList(filesInfo.reversed())
-                    button.setRightDrawable(getDrawable(R.drawable.baseline_keyboard_arrow_up_24))
-                    true
-                }
+                byAsc =
+                    if (byAsc) {//при нажатии на кнопку меняем порядок сортировки на противоположный
+                        // и также меняем стрелку, которая этот порядок отображает
+                        adapter.updateFilesList(filesInfo)
+                        button.setRightDrawable(getDrawable(R.drawable.baseline_keyboard_arrow_down_24))
+                        false
+                    } else {
+                        adapter.updateFilesList(filesInfo.reversed())
+                        button.setRightDrawable(getDrawable(R.drawable.baseline_keyboard_arrow_up_24))
+                        true
+                    }
             }
         }
-    }
-
-    private fun updateAdapterList(filesList: List<FileInfo>) {
-        adapter.deleteAll()
-        adapter.insertFiles(filesList)
     }
 
     private fun handleFilesState(filesState: FilesState) {
@@ -128,18 +135,30 @@ class MainActivity : AppCompatActivity() {
             is FilesState.Loading -> Unit//TODO добавить progressbar
             is FilesState.Error -> showErrorMsg(filesState.text)
             is FilesState.Content -> {
-                filesInfo.clear()
-                filesInfo.addAll(filesState.filesInfoList)
-                adapter.insertFiles(filesState.filesInfoList)
+                if (filesState.filesInfoList != null && filesState.filesInfoList.isNotEmpty()) {
+                    binding.apply {
+                        fileInfoRecyclerView.isVisible = true
+                        infoTextView.isVisible = false
+                    }
+                    filesInfo.clear()
+                    filesInfo.addAll(filesState.filesInfoList)
+                    adapter.updateFilesList(filesState.filesInfoList)
+                } else {
+                    binding.apply {
+                        fileInfoRecyclerView.isVisible = false
+                        infoTextView.apply {
+                            text = getString(R.string.no_files)
+                            isVisible = true
+                        }
+                    }
+                }
             }
         }
     }
 
     private fun showErrorMsg(msg: String) {
         Toast.makeText(
-            this@MainActivity,
-            msg,
-            Toast.LENGTH_LONG
+            this@MainActivity, msg, Toast.LENGTH_LONG
         ).show()
     }
 
@@ -156,16 +175,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun isPermissionGranted(): Boolean =
         PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.READ_EXTERNAL_STORAGE
+            this, Manifest.permission.READ_EXTERNAL_STORAGE
         )
 
 
 }
 
-enum class SortType{
-    BY_NAME,
-    BY_SIZE,
-    BY_TYPE,
-    BY_DATE
+enum class SortType {
+    BY_NAME, BY_SIZE, BY_TYPE, BY_DATE
 }

@@ -11,6 +11,6 @@ interface FileHashDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(fileHashEntity: FileHashEntity)
 
-    @Query("SELECT * FROM files_hash_table WHERE hash = :fileHash")
-    suspend fun loadFileHash(fileHash: Int): FileHashEntity?
+    @Query("SELECT * FROM files_hash_table")
+    suspend fun loadAllFileHashes():  List<FileHashEntity>
 }

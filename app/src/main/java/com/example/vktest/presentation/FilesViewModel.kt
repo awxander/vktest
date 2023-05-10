@@ -1,5 +1,6 @@
 package com.example.vktest.presentation
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -14,10 +15,14 @@ class FilesViewModel(private val repository: FilesRepository) : ViewModel() {
     private val _filesState = MutableLiveData<FilesState>()
     val filesState: LiveData<FilesState> = _filesState
 
-    fun loadFilesInfo() {
+    fun loadFilesInfo(uri: Uri? = null) {
         viewModelScope.launch {
             try {
-                val filesInfo = repository.loadFilesInfo()
+                val filesInfo =
+                    if (uri == null)
+                        repository.loadFilesInfo()
+                    else
+                        repository.loadFilesInfo(uri)
                 _filesState.value = FilesState.Content(filesInfo)
             } catch (e: Exception) {
                 Log.e(TAG, e.stackTrace.contentToString() + e.message.orEmpty())
@@ -26,7 +31,7 @@ class FilesViewModel(private val repository: FilesRepository) : ViewModel() {
         }
     }
 
-    fun loadModifiedFiles(){
+    fun loadModifiedFiles() {
         viewModelScope.launch {
             try {
                 val filesInfo = repository.loadChangedFiles()

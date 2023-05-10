@@ -11,4 +11,5 @@
     <string name="size">размер</string>
     <string name="extension">тип</string>
     <string name="modified_date">дата изменеия</string>
+    <string name="no_files">тут пусто</string>
 </resources>
