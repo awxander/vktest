@@ -17,11 +17,8 @@ class LocalDataSource(private val contentResolver: ContentResolver) {
 
         val root = if (dirUri != null) {
             File(dirUri.path)
-//            result.addAll(getDirectoryFilesInfo(dirUri))
         } else {
             Environment.getExternalStorageDirectory()
-//            result.addAll(loadExternalStorageFilesInfo())
-//            result.addAll(loadExternalStorageFoldersInfo())
         }
 
         if (root.isDirectory) {
@@ -34,12 +31,12 @@ class LocalDataSource(private val contentResolver: ContentResolver) {
                 else
                     file.extension
                 val uri = Uri.parse(file.toURI().toString())
-                val modifiedDate = file.lastModified()
+                val modifiedDateInSeconds = file.lastModified() / 1000
                 filesInfo.add(
                     FileInfo(
                         name = name,
                         sizeInBytes = sizeInBytes,
-                        modifiedDateInSeconds = modifiedDate,
+                        modifiedDateInSeconds = modifiedDateInSeconds,
                         extension = extension,
                         uri = uri
                     )

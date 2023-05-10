@@ -21,20 +21,15 @@ import com.example.vktest.presentation.FilesAdapter
 import com.example.vktest.presentation.FilesState
 import com.example.vktest.presentation.FilesViewModel
 import java.util.Stack
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
 
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel by lazy {//TODO сделать через di
-        FilesViewModel(
-            FilesRepositoryImpl(
-                database = FileHashDatabase.getInstance(this),
-                dataSource = LocalDataSource(applicationContext.contentResolver)
-            )
-        )
-    }
+    @Inject
+    lateinit var viewModel : FilesViewModel
 
     private val adapter = FilesAdapter(::onClick)
     private val filesInfo = mutableListOf<FileInfo>()
@@ -60,6 +55,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        appComponent.inject(this)
 
         initRecyclerView()
         initListeners()
@@ -95,6 +91,7 @@ class MainActivity : AppCompatActivity() {
         binding.apply {
             loadFilesButton.setOnClickListener {
                 checkPermission()
+                directoriesUriStack.clear()
                 viewModel.loadFilesInfo()
             }
             setSortRadioButton(sortByNameBtn, SortType.BY_NAME)
