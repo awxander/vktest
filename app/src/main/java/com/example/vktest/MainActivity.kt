@@ -20,6 +20,7 @@ import com.example.vktest.domain.entites.FileInfo
 import com.example.vktest.presentation.FilesAdapter
 import com.example.vktest.presentation.FilesState
 import com.example.vktest.presentation.FilesViewModel
+import java.util.Stack
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,8 +37,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val adapter = FilesAdapter(::onClick)
-
     private val filesInfo = mutableListOf<FileInfo>()
+    private val directoriesUriStack = Stack<Uri?>()
+
+    private var parentUri : Uri? = null
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -62,19 +65,30 @@ class MainActivity : AppCompatActivity() {
         initListeners()
 
         viewModel.filesState.observe(this, ::handleFilesState)
+
         checkPermission()
-        viewModel.loadFilesInfo()
+        viewModel.saveFileHashes()
     }
 
-    private fun onClick(fileInfo: FileInfo){
-        if(fileInfo.extension == Extensions.DIRECTORY){
+    private fun onClick(fileInfo: FileInfo) {
+        if (fileInfo.extension == Extensions.DIRECTORY) {
+            directoriesUriStack.push(parentUri)
             viewModel.loadFilesInfo(fileInfo.uri)
-        }else{
+            parentUri = fileInfo.uri
+        } else {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data = fileInfo.uri
             intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             startActivity(intent)
         }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (directoriesUriStack.size > 0)
+            viewModel.loadFilesInfo(directoriesUriStack.pop())
+        else
+            super.onBackPressed()
     }
 
     private fun initListeners() {

@@ -43,5 +43,11 @@ class FilesViewModel(private val repository: FilesRepository) : ViewModel() {
         }
     }
 
+    fun saveFileHashes(){
+        viewModelScope.launch {
+            repository.saveFilesHashesToDb()
+        }
+    }
+
 
 }

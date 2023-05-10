@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.vktest.Extensions
@@ -13,7 +14,8 @@ import com.example.vktest.data.DateFormatter
 import com.example.vktest.databinding.FileInfoItemBinding
 import com.example.vktest.domain.entites.FileInfo
 
-class FilesAdapter(private val onClick : (FileInfo) -> Unit) : RecyclerView.Adapter<FileInfoViewHolder>() {
+class FilesAdapter(private val onClick: (FileInfo) -> Unit) :
+    RecyclerView.Adapter<FileInfoViewHolder>() {
 
     private val filesList = mutableListOf<FileInfo>()
 
@@ -51,10 +53,16 @@ class FileInfoViewHolder(view: View) : ViewHolder(view) {
     private val binding = FileInfoItemBinding.bind(view)
 
 
-    fun bind(fileInfo: FileInfo, onClick : (FileInfo) -> Unit) {
+    fun bind(fileInfo: FileInfo, onClick: (FileInfo) -> Unit) {
         binding.apply {
             textViewName.text = fileInfo.name
-            textViewSize.text = Formatter.formatFileSize(itemView.context, fileInfo.sizeInBytes)
+            if (fileInfo.extension != Extensions.DIRECTORY){
+                textViewSize.isVisible = true
+                textViewSize.text = Formatter.formatFileSize(itemView.context, fileInfo.sizeInBytes)
+            }else{
+                textViewSize.isVisible = false
+            }
+
             textViewCreateDate.text = DateFormatter.getDate(fileInfo.modifiedDateInSeconds)
             imageView.setImageResource(getDrawableForExtension(fileInfo.extension))
             if (fileInfo.modified)

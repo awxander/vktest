@@ -6,9 +6,6 @@ import com.example.vktest.data.datasource.LocalDataSource
 import com.example.vktest.data.db.FileHashDatabase
 import com.example.vktest.domain.entites.FileInfo
 import com.example.vktest.domain.repository.FilesRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class FilesRepositoryImpl(
     private val database: FileHashDatabase,
@@ -19,33 +16,31 @@ class FilesRepositoryImpl(
 
     private var filesInfo: List<FileInfo>? = null
     private val changedFilesInfo = mutableListOf<FileInfo>()
-    private var fileHashesInMap: HashMap<Int, Int>? = null
+    private var lastSavedFileHashesInMap: HashMap<Int, Int>? = null
 
     override suspend fun loadFilesInfo(uri: Uri?): List<FileInfo> {
         filesInfo = if (uri == null)
-            dataSource.loadFilesInfo()
+            dataSource.loadDirectoryFilesInfo()
         else
-            dataSource.loadFilesInfo(uri)
-
-        if (initialLoad) {
-            CoroutineScope(Dispatchers.Default).launch {
-                fileHashesInMap = loadFilesHashesFromDbInMap()
-                for (fileInfo in filesInfo!!) {
-                    if (!fileHashesInMap!!.containsKey(fileInfo.hashCode())) {
-                        fileInfo.modified = true
-                        changedFilesInfo.add(fileInfo)//добавляем измененный файл
-                        database.fileHashDao()
-                            .insert(FileInfoConverter.toFileHashEntity(fileInfo))//добавляем его хэш в бд
-                    }
-                }
-            }
-            initialLoad = false
-        }
+            dataSource.loadDirectoryFilesInfo(uri)
         return filesInfo as List<FileInfo>
     }
+    
+    
 
     override suspend fun loadChangedFiles(): List<FileInfo> {
         return changedFilesInfo
+    }
+
+    override suspend fun saveFilesHashesToDb() {
+        val filesInfo = dataSource.loadAllFilesInfo()
+        lastSavedFileHashesInMap = loadFilesHashesFromDbInMap()
+        for(fileInfo in filesInfo){
+            if(!lastSavedFileHashesInMap!!.containsKey(fileInfo.hashCode())){
+                database.fileHashDao().insert(FileInfoConverter.toFileHashEntity(fileInfo))
+                changedFilesInfo.add(fileInfo)
+            }
+        }
     }
 
     private suspend fun loadFilesHashesFromDbInMap(): HashMap<Int, Int> {
