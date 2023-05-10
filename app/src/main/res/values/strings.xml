@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">vktest</string>
+    <string name="my_photo">my Photo</string>
+    <string name="_30_kb">30 KB</string>
+    <string name="_11_04_2023_18_30">11.04.2023-18:30</string>
+    <string name="permission_received">разрешение получено</string>
+    <string name="permission_denied">в разрешении отказано</string>
+    <string name="watch_changed_files">посмотреть \n измененные</string>
+    <string name="load_files">загрузить \n файлы</string>
+    <string name="name">название</string>
+    <string name="size">размер</string>
+    <string name="extension">тип</string>
+    <string name="modified_date">дата изменеия</string>
+    <string name="no_files">тут пусто</string>
+</resources>
